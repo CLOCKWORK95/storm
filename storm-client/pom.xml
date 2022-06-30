@@ -113,6 +113,12 @@
             <artifactId>mockito-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest</artifactId>
         </dependency>
@@ -161,6 +167,11 @@
             </testResource>
         </testResources>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M1</version>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-report-plugin</artifactId>
@@ -272,7 +283,7 @@
             </activation>
             <build>
                 <plugins>
-                    <plugin>
+                    <!-->><plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
                         <executions>
@@ -296,7 +307,7 @@
                                 </goals>
                             </execution>
                         </executions>
-                    </plugin>
+                    </plugin><-->
                     <plugin>
                         <groupId>org.apache.storm</groupId>
                         <artifactId>storm-maven-plugins</artifactId>
