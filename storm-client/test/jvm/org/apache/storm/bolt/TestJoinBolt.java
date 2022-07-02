@@ -75,7 +75,7 @@ public class TestJoinBolt {
 
 
     @Test
-    public void testJoinBoltConstructor(){
+    public void testJoinBolt(){
         try{
             JoinBolt joiner = new JoinBolt(JoinBolt.Selector.STREAM, srcOrStreamId, fieldName);
             Assert.assertEquals(expectedResult, joiner.getClass());
