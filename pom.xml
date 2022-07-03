@@ -324,6 +324,7 @@
         <joda-time.version>2.3</joda-time.version>
         <thrift.version>0.13.0</thrift.version>
         <junit.jupiter.version>5.5.1</junit.jupiter.version>
+        <jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
         <surefire.version>3.0.0-M5</surefire.version>
         <awaitility.version>3.1.0</awaitility.version>
         <hdrhistogram.version>2.1.10</hdrhistogram.version>
@@ -337,7 +338,7 @@
         <jedis.version>2.9.0</jedis.version>
         <activemq.version>5.16.5</activemq.version>
         <rocketmq.version>4.2.0</rocketmq.version>
-
+        <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
         <jackson.version>2.10.5</jackson.version>
         <jackson.databind.version>2.10.5.1</jackson.databind.version>
         
@@ -382,6 +383,10 @@
         <module>storm-clojure</module>
         <module>storm-clojure-test</module>
         <module>storm-submit-tools</module>
+        <!--> ADDED NEW MODULE TO COLLECT COVERAGE REPORTS OF ALL MODULES WITH TESTS 
+          OTHER STEPS ARE ABOUT POM.XML FILES OF ALL INVOLVED SUBMODULES, ALSO THE JACOCO-REPORT-AGGREGATOR MODULE
+        <-->
+        <module>jacoco-report-aggregator</module>
     </modules>
 
     <dependencies>
@@ -1428,6 +1433,42 @@
 
 
         <plugins>
+            <!--> ADD JACOCO BLUGIN IN BUILD-PLUGINS ( NOT INSIDE PLUGINMANAGEMENT! ) TO MAKE JACOCO WORK CORRECTLY <-->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.8</version>
+                <executions>
+                    <execution>
+                        <id>jacoco-prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>jacoco-report</id>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+                <!--> COMMENT THE CONFIGURATIONS OF SUREFIRE PLUGIN TO MAKE JACOCO WORK CORRECTLY
+                <configuration>
+                <trimStackTrace>false</trimStackTrace>
+                <properties>
+                    <property>
+                    <name>listener</name>
+                    <value>org.apache.bookkeeper.common.testing.util.TimedOutTestsListener</value>
+                    </property>
+                </properties>
+                </configuration>
+                <-->
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

@@ -19,7 +19,6 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-   
     <parent>
         <artifactId>storm</artifactId>
         <groupId>org.apache.storm</groupId>
@@ -32,7 +31,6 @@
     <name>Storm Client</name>
     <description>The client side (including worker) of Storm implementations.</description>
 
-    
     <dependencies>
         <!-- logging -->
 
@@ -110,48 +108,31 @@
         <!-- end of transitive dependency management -->
 
         <!-- test -->
-
-        <!--><dependency>
+        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.6.2</version>
-            <scope>test</scope>
-        </dependency><-->
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
+            <version>${junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
-
-        <!--><dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>5.5.1</version>
             <scope>test</scope>
-        </dependency><-->
-        <!-->><dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest</artifactId>
-        </dependency><-->
-        <!--><dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency><-->
-
+        </dependency>
     </dependencies>
 
     <build>
         <sourceDirectory>src/jvm</sourceDirectory>
-        <testSourceDirectory>test/jvm/org/apache/storm/bolt</testSourceDirectory>
-        
+        <testSourceDirectory>test/jvm</testSourceDirectory>
         <resources>
             <resource>
                 <directory>../conf</directory>
@@ -190,17 +171,17 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven-surefire-plugin.version}</version>
+                <version>3.0.0-M3</version>
             </plugin>
-            <plugin>
+            <!--><plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-report-plugin</artifactId>
-                <!--><configuration>
+                <configuration>
                     <reportsDirectories>
                         <file>${project.build.directory}/test-reports</file>
                     </reportsDirectories>
-                </configuration><-->
-            </plugin>
+                </configuration>
+            </plugin><-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -211,6 +192,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
+                <!--Note - the version would be inherited-->
                 <configuration>
                     <excludes>**/generated/**</excludes>
                 </configuration>
@@ -232,6 +214,7 @@
                             <includeScope>runtime</includeScope>
                         </configuration>
                     </execution>
+                    <!-- multi-lang resources -->
                     <execution>
                         <id>unpack</id>
                         <phase>process-test-resources</phase>
@@ -268,6 +251,7 @@
                     <execution>
                         <id>attach-sources</id>
                         <goals>
+                            <!-- avoid warning about recursion -->
                             <goal>jar-no-fork</goal>
                         </goals>
                     </execution>
@@ -290,7 +274,7 @@
             </plugin>
         </plugins>
     </build>
-    <!--><profiles>
+    <profiles>
         <profile>
             <id>unix_py_tests</id>
             <activation>
@@ -350,5 +334,5 @@
                 </plugins>
             </build>
         </profile>
-    </profiles><-->
+    </profiles>
 </project>

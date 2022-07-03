@@ -1,14 +1,12 @@
 package org.apache.storm.bolt;
-import java.util.Arrays;
-import java.util.Collection;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import java.util.stream.Stream;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(Parameterized.class)
 public class TestJoinBolt {
 
     String[] reservationsFields = {"tableNumber", "name"};
@@ -50,40 +48,41 @@ public class TestJoinBolt {
     private Object expectedResult;
     
 
-    @Parameterized.Parameters
-    public static Collection<Object[]> parameters(){
-        return Arrays.asList(new Object[][]{
-            //  srcOrStreamId       fieldName       expectedValue
-            {"",            "",             Exception.class},
-            {null,          null,           NullPointerException.class},
-            {"sourceId",    "fieldName",    JoinBolt.class}
-        });
+    @ParameterizedTest
+    @MethodSource
+    public void testJoinBolt( String srcOrStreamId, String fieldName, Object expectedResult ){
+        try{
+            JoinBolt joiner = new JoinBolt(JoinBolt.Selector.STREAM, srcOrStreamId, fieldName);
+            assertEquals(expectedResult, joiner.getClass());
+        }
+        catch (Exception e){
+            assertEquals(expectedResult, e.getClass());
+        }
+    }
+
+    
+    private static Stream<Arguments> testJoinBolt(){
+        //  srcOrStreamId       fieldName       expectedValue
+        return Stream.of(       
+                Arguments.of("",            "",             JoinBolt.class),
+                Arguments.of(null,          null,           NullPointerException.class),
+                Arguments.of("sourceId",    "fieldName",    JoinBolt.class)
+        );
     }
 
 
-    public TestJoinBolt(String srcOrStreamId, String fieldName, Object expectedResult){
+    /*public TestJoinBolt(String srcOrStreamId, String fieldName, Object expectedResult){
         this.srcOrStreamId = srcOrStreamId;
         this.fieldName = fieldName;
         this.expectedResult = expectedResult;
-    }
+    }*/
 
 
-    @Before
+    /*@BeforeEach
     public void configure(){
         
-    }
+    }*/
 
-
-    @Test
-    public void testJoinBolt(){
-        try{
-            JoinBolt joiner = new JoinBolt(JoinBolt.Selector.STREAM, srcOrStreamId, fieldName);
-            Assert.assertEquals(expectedResult, joiner.getClass());
-        }
-        catch (Exception e){
-            Assert.assertEquals(expectedResult, e.getClass());
-        }
-    }
 
 
 
