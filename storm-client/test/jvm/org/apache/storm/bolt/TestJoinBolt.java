@@ -2,7 +2,6 @@ package org.apache.storm.bolt;
 
 import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -42,12 +41,6 @@ public class TestJoinBolt {
     };
     
 
-    // Test Parameters
-    private String srcOrStreamId;
-    private String fieldName;
-    private Object expectedResult;
-    
-
     @ParameterizedTest
     @MethodSource
     public void testJoinBolt( String srcOrStreamId, String fieldName, Object expectedResult ){
@@ -69,20 +62,6 @@ public class TestJoinBolt {
                 Arguments.of("sourceId",    "fieldName",    JoinBolt.class)
         );
     }
-
-
-    /*public TestJoinBolt(String srcOrStreamId, String fieldName, Object expectedResult){
-        this.srcOrStreamId = srcOrStreamId;
-        this.fieldName = fieldName;
-        this.expectedResult = expectedResult;
-    }*/
-
-
-    /*@BeforeEach
-    public void configure(){
-        
-    }*/
-
 
 
 

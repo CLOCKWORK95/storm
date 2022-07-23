@@ -285,7 +285,8 @@
         <license.skipAggregateDownloadLicenses>true</license.skipAggregateDownloadLicenses>
         <license.thirdPartyFilename>DEPENDENCY-LICENSES</license.thirdPartyFilename>
         <license.outputDirectory>${project.basedir}</license.outputDirectory>
-
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>     
         <!-- dependency versions -->
         <clojure.version>1.10.0</clojure.version>
         <commons-compress.version>1.21</commons-compress.version>
@@ -378,8 +379,8 @@
         <module>storm-buildtools/storm-maven-plugins</module>
         <module>storm-client</module>
         <module>storm-server</module>
-        <module>storm-core</module>
-        <module>storm-webapp</module>
+        <!--><module>storm-core</module>
+        <module>storm-webapp</module><-->
         <module>storm-clojure</module>
         <module>storm-clojure-test</module>
         <module>storm-submit-tools</module>
@@ -394,6 +395,19 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.8.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.19.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -651,7 +665,7 @@
                 <module>external/storm-autocreds</module>
                 <module>external/storm-hdfs</module>
                 <module>external/storm-hdfs-blobstore</module>
-                <module>external/storm-hdfs-oci</module>
+                <!--><module>external/storm-hdfs-oci</module><-->
                 <module>external/storm-hbase</module>
                 <module>external/storm-hive</module>
                 <module>external/storm-jdbc</module>
@@ -671,7 +685,7 @@
                 <module>external/storm-jms</module>
                 <module>external/storm-pmml</module>
                 <module>external/storm-rocketmq</module>
-                <module>external/storm-blobstore-migration</module>
+                <!--><module>external/storm-blobstore-migration</module><-->
                 <module>integration-test</module>
 
                 <!-- The following modules have dependencies on external modules. -->
@@ -679,7 +693,7 @@
                 <module>sql</module>
             </modules>
         </profile>
-        <profile>
+        <!--><profile>
             <id>examples</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -703,7 +717,7 @@
                 <module>examples/storm-rocketmq-examples</module>
                 <module>examples/storm-perf</module>
             </modules>
-        </profile>
+        </profile><-->
     </profiles>
 
     <distributionManagement>
@@ -997,6 +1011,20 @@
                 <version>${mockito.version}</version>
                 <scope>test</scope>
             </dependency>
+
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>${junit.jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>3.19.0</version>
+                <scope>test</scope>
+            </dependency>
+
             <dependency>
                 <groupId>org.awaitility</groupId>
                 <artifactId>awaitility</artifactId>
@@ -1184,7 +1212,7 @@
     <build>
         <pluginManagement>
             <plugins>
-                <plugin>
+                <!--><plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${surefire.version}</version>
@@ -1220,7 +1248,7 @@
                             </goals>
                         </execution>
                     </executions>
-                </plugin>
+                </plugin><-->
                 <plugin>
                     <!--To support checkstyle goals. For example: "mvn checkstyle:checkstyle"-->
                     <groupId>org.apache.maven.plugins</groupId>
