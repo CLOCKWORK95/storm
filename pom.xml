@@ -285,7 +285,8 @@
         <license.skipAggregateDownloadLicenses>true</license.skipAggregateDownloadLicenses>
         <license.thirdPartyFilename>DEPENDENCY-LICENSES</license.thirdPartyFilename>
         <license.outputDirectory>${project.basedir}</license.outputDirectory>
-
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>     
         <!-- dependency versions -->
         <clojure.version>1.10.0</clojure.version>
         <commons-compress.version>1.21</commons-compress.version>
@@ -324,6 +325,7 @@
         <joda-time.version>2.3</joda-time.version>
         <thrift.version>0.13.0</thrift.version>
         <junit.jupiter.version>5.5.1</junit.jupiter.version>
+        <jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
         <surefire.version>3.0.0-M5</surefire.version>
         <awaitility.version>3.1.0</awaitility.version>
         <hdrhistogram.version>2.1.10</hdrhistogram.version>
@@ -337,7 +339,7 @@
         <jedis.version>2.9.0</jedis.version>
         <activemq.version>5.16.5</activemq.version>
         <rocketmq.version>4.2.0</rocketmq.version>
-
+        <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
         <jackson.version>2.10.5</jackson.version>
         <jackson.databind.version>2.10.5.1</jackson.databind.version>
         
@@ -377,11 +379,15 @@
         <module>storm-buildtools/storm-maven-plugins</module>
         <module>storm-client</module>
         <module>storm-server</module>
-        <module>storm-core</module>
-        <module>storm-webapp</module>
+        <!--><module>storm-core</module>
+        <module>storm-webapp</module><-->
         <module>storm-clojure</module>
         <module>storm-clojure-test</module>
         <module>storm-submit-tools</module>
+        <!--> ADDED NEW MODULE TO COLLECT COVERAGE REPORTS OF ALL MODULES WITH TESTS 
+          OTHER STEPS ARE ABOUT POM.XML FILES OF ALL INVOLVED SUBMODULES, ALSO THE JACOCO-REPORT-AGGREGATOR MODULE
+        <-->
+        <module>jacoco-report-aggregator</module>
     </modules>
 
     <dependencies>
@@ -389,6 +395,19 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.8.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.19.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -646,7 +665,7 @@
                 <module>external/storm-autocreds</module>
                 <module>external/storm-hdfs</module>
                 <module>external/storm-hdfs-blobstore</module>
-                <module>external/storm-hdfs-oci</module>
+                <!--><module>external/storm-hdfs-oci</module><-->
                 <module>external/storm-hbase</module>
                 <module>external/storm-hive</module>
                 <module>external/storm-jdbc</module>
@@ -666,7 +685,7 @@
                 <module>external/storm-jms</module>
                 <module>external/storm-pmml</module>
                 <module>external/storm-rocketmq</module>
-                <module>external/storm-blobstore-migration</module>
+                <!--><module>external/storm-blobstore-migration</module><-->
                 <module>integration-test</module>
 
                 <!-- The following modules have dependencies on external modules. -->
@@ -674,7 +693,7 @@
                 <module>sql</module>
             </modules>
         </profile>
-        <profile>
+        <!--><profile>
             <id>examples</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -698,7 +717,7 @@
                 <module>examples/storm-rocketmq-examples</module>
                 <module>examples/storm-perf</module>
             </modules>
-        </profile>
+        </profile><-->
     </profiles>
 
     <distributionManagement>
@@ -992,6 +1011,20 @@
                 <version>${mockito.version}</version>
                 <scope>test</scope>
             </dependency>
+
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>${junit.jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>3.19.0</version>
+                <scope>test</scope>
+            </dependency>
+
             <dependency>
                 <groupId>org.awaitility</groupId>
                 <artifactId>awaitility</artifactId>
@@ -1179,7 +1212,7 @@
     <build>
         <pluginManagement>
             <plugins>
-                <plugin>
+                <!--><plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${surefire.version}</version>
@@ -1215,7 +1248,7 @@
                             </goals>
                         </execution>
                     </executions>
-                </plugin>
+                </plugin><-->
                 <plugin>
                     <!--To support checkstyle goals. For example: "mvn checkstyle:checkstyle"-->
                     <groupId>org.apache.maven.plugins</groupId>
@@ -1428,6 +1461,42 @@
 
 
         <plugins>
+            <!--> ADD JACOCO BLUGIN IN BUILD-PLUGINS ( NOT INSIDE PLUGINMANAGEMENT! ) TO MAKE JACOCO WORK CORRECTLY <-->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.8</version>
+                <executions>
+                    <execution>
+                        <id>jacoco-prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>jacoco-report</id>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+                <!--> COMMENT THE CONFIGURATIONS OF SUREFIRE PLUGIN TO MAKE JACOCO WORK CORRECTLY
+                <configuration>
+                <trimStackTrace>false</trimStackTrace>
+                <properties>
+                    <property>
+                    <name>listener</name>
+                    <value>org.apache.bookkeeper.common.testing.util.TimedOutTestsListener</value>
+                    </property>
+                </properties>
+                </configuration>
+                <-->
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
