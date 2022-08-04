@@ -1,6 +1,7 @@
 package org.apache.storm.bolt;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.apache.storm.task.GeneralTopologyContext;
@@ -29,6 +30,35 @@ public class TestJoinBoltSelect {
     private static JoinBolt         bolt;
     
 
+    private static ArrayList<List<Object>> transformStreamData(){
+        ArrayList<List<Object>> result = new ArrayList<>();
+        for( int i = 0; i < streamData.length; i++ ){
+            List<Object> entries = new ArrayList<>(Arrays.asList(streamData[i]));
+            result.add(entries);
+        }
+        return result;
+    }
+
+    private static ArrayList<List<Object>> nullStream(){
+        ArrayList<List<Object>> result = new ArrayList<>();
+        for( int i = 0; i < streamData.length; i++ ){
+            List<Object> entries = new ArrayList<>(Arrays.asList(new Object[]{null}));
+            result.add(entries);
+        }
+        return result;
+    }
+
+    private static ArrayList<List<Object>> transformStreamDataPlusNull(){
+        ArrayList<List<Object>> result = new ArrayList<>();
+        for( int i = 0; i < streamData.length; i++ ){
+            Object[] newEntry = {streamData[i][0], streamData[i][1], null };
+            List<Object> entries = new ArrayList<>(Arrays.asList(newEntry));
+            result.add(entries);
+        }
+        return result;
+    } 
+
+
 
     private static ArrayList<Tuple> createNewStream(String streamName, String[] fieldNames, Object[][] data, String srcComponentName) {
         GeneralTopologyContext mockContext = new CustomContext(fieldNames);
@@ -44,18 +74,10 @@ public class TestJoinBoltSelect {
     private static TupleWindow createNewWindowForSingleStream(ArrayList<Tuple> stream) {
         return new TupleWindowImpl(stream, null, null); 
     }
-
-    /* 
-    private static TupleWindow createNewWindowForMultipleStreams(ArrayList<Tuple> ... streams) {
-        if (streams == null) return new TupleWindowImpl(new ArrayList<Tuple>(), null, null); 
-        ArrayList<Tuple> allStreams= new ArrayList<>();
-        for (int i = 0; i < streams.length; i++) {
-            allStreams.addAll(streams[i]);
-        }
-        return new TupleWindowImpl(allStreams, null, null);
-    }
-     */
+   
     
+
+
      @BeforeEach
     public void configure(){
         mockedCollector = new CustomCollector();
@@ -71,7 +93,9 @@ public class TestJoinBoltSelect {
             bolt.select(commaSeparatedValues);
             bolt.prepare(null, null, mockedCollector);
             bolt.execute(window);
-            assertEquals(expectedResult, mockedCollector.outputs.size());
+
+            assertEquals((ArrayList<Object>) expectedResult, mockedCollector.outputs);
+
         } catch(Exception e){
             assertEquals(expectedResult, e.getClass());
         }
@@ -79,11 +103,13 @@ public class TestJoinBoltSelect {
 
     
     private static Stream<Arguments> testJoinBoltSelect(){
-        //  streamName       expectedResult (result size)
+        //      fields       expectedResult (result size)
         return Stream.of(       
-                Arguments.of( "tableNumber,name",   4),
-                Arguments.of( "",                   4),
-                Arguments.of( "tableNumber",        4)
+                Arguments.of( "field1,field2",                      transformStreamData()),
+                Arguments.of( "",                                   nullStream()),
+                Arguments.of( null,                                 NullPointerException.class),
+                Arguments.of( "notExistingField!",                  nullStream()),
+                Arguments.of( "field1,field2,field3",               transformStreamDataPlusNull())
         );
     }
 
