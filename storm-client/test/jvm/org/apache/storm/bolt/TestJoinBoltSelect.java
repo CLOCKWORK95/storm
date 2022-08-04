@@ -30,6 +30,16 @@ public class TestJoinBoltSelect {
     private static JoinBolt         bolt;
     
 
+    private static ArrayList<List<Object>> transformStreamDataFirstOnly(){
+        ArrayList<List<Object>> result = new ArrayList<>();
+        for( int i = 0; i < streamData.length; i++ ){
+            Object[] newEntry = {streamData[i][0]};
+            List<Object> entries = new ArrayList<>(Arrays.asList(newEntry));
+            result.add(entries);
+        }
+        return result;
+    }
+
     private static ArrayList<List<Object>> transformStreamData(){
         ArrayList<List<Object>> result = new ArrayList<>();
         for( int i = 0; i < streamData.length; i++ ){
@@ -106,6 +116,7 @@ public class TestJoinBoltSelect {
         //      fields       expectedResult (result size)
         return Stream.of(       
                 Arguments.of( "field1,field2",                      transformStreamData()),
+                Arguments.of( "field1",                             transformStreamDataFirstOnly()),
                 Arguments.of( "",                                   nullStream()),
                 Arguments.of( null,                                 NullPointerException.class),
                 Arguments.of( "notExistingField!",                  nullStream()),
