@@ -61,7 +61,6 @@ public class TestWritableUtilsReadCompressedStringArray {
         return new byte[0];
     }
 
-
     public static DataInput createDataInput( ARRAY_TYPES streamType ) throws IOException{
 
         Object target = null;
