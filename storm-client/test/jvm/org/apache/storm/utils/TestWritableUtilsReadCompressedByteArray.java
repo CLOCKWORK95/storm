@@ -15,12 +15,33 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
+import java.awt.image.BufferedImage;
+
+import javax.imageio.ImageIO;
+import javax.imageio.stream.FileImageOutputStream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+
+
 public class TestWritableUtilsReadCompressedByteArray {
 
+    public void createCompressedImageFile() {
+        
+        BufferedImage image = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+        String path = ".." + File.pathSeparator + "image.jpg";
+        try {
+            FileImageOutputStream imout = new FileImageOutputStream( new File(path) );
+            ImageIO.write(image,"jpg", imout);
+            imout.flush();
+            imout.close();
+        } catch (IOException ex) {
+          System.err.println("I/O error : Cannot generate " + path);
+        }
+        
+      }
+      
     public static File createCompressedFile() throws IOException{
         File f = new File(".." + File.pathSeparator + "filename" );
         FileOutputStream fos;
@@ -139,7 +160,6 @@ public class TestWritableUtilsReadCompressedByteArray {
         //      DataInput       ExpectedResult
         return Stream.of(       
                 Arguments.of( createDataInput(STREAM_TYPES.FILE) ,              "foo file text!".getBytes()),
-                //Arguments.of( createDataInput(STREAM_TYPES.EMPTY_FILE),         ClassCastException.class),
                 Arguments.of( createDataInput(STREAM_TYPES.BYTE_ARRAY),         "foo byte array text!".getBytes() ),
                 Arguments.of( createDataInput(STREAM_TYPES.EMPTY_BYTE_ARRAY),   EOFException.class ),
                 Arguments.of( null,                                NullPointerException.class )

@@ -58,7 +58,8 @@ public class TestJoinBoltJoin {
         return stream;
     }
 
-    private TupleWindow createNewWindow(ArrayList<Tuple> ... streams) {
+    @SafeVarargs
+    private final TupleWindow createNewWindow(ArrayList<Tuple> ... streams) {
         if (streams == null) return new TupleWindowImpl(new ArrayList<Tuple>(), null, null); 
         ArrayList<Tuple> allStreams= new ArrayList<>();
         for (int i = 0; i < streams.length; i++) {
@@ -68,32 +69,34 @@ public class TestJoinBoltJoin {
     }
 
 
+    private static TupleStream  stream1;
+    private static TupleStream  stream2;
+    private static JoinBolt     bolt;
 
-    private static TupleStream stream1;
-    private static TupleStream stream2;
 
     @BeforeEach
     public void configure(){
         mockedCollector = new CustomCollector();
+        stream1 = StreamGenerator.createStream(STREAM.MENU, 0);
+        bolt = new JoinBolt(JoinBolt.Selector.STREAM, stream1.streamName, stream1.streamFields[stream1.fieldIndex]);
     }
+
 
     @ParameterizedTest
     @MethodSource
-    public void testJoinBoltJoin( STREAM originalStream, STREAM secondStream, STREAM thirdStream, JOINTYPE jointype, int field1Index, int field2Index, Object expectedResult){
+    public void testJoinBoltJoin( STREAM secondStream, int field2Index, STREAM thirdStream, int field3Index, JOINTYPE jointype, Object expectedResult ){
 
-        StreamGenerator generator = new StreamGenerator();
-        stream1 = generator.createStream(originalStream, field1Index);
-        stream2 = generator.createStream(secondStream, field2Index);
+        stream2 = StreamGenerator.createStream(secondStream, field2Index);
 
         switch(jointype){
+
             case LEFT:
                 try{
                    
                     TupleWindow window = createNewWindow(stream1.inputStream, stream2.inputStream);
 
-                    JoinBolt bolt = new JoinBolt(JoinBolt.Selector.STREAM, stream1.streamName, stream1.streamFields[stream1.fieldIndex])
-                        .leftJoin(stream2.streamName, stream2.streamFields[stream2.fieldIndex], stream1.streamName)
-                        .select(stream1.commaSeparatedValues + stream2.commaSeparatedValues);
+                    bolt.leftJoin(stream2.streamName, stream2.streamFields[stream2.fieldIndex], stream1.streamName);
+                    bolt.select(stream1.commaSeparatedValues + stream2.commaSeparatedValues);
                     bolt.prepare(null, null, mockedCollector);
                     bolt.execute(window);
                     
@@ -102,14 +105,14 @@ public class TestJoinBoltJoin {
                     assertEquals(expectedResult, e.getClass());
                 }
                 break;
+
             case INNER:
                 try{
                     
                     TupleWindow window = createNewWindow(stream1.inputStream, stream2.inputStream);
 
-                    JoinBolt bolt = new JoinBolt(JoinBolt.Selector.STREAM, stream1.streamName, stream1.streamFields[stream1.fieldIndex])
-                        .join(stream2.streamName, stream2.streamFields[stream2.fieldIndex], stream1.streamName)
-                        .select(stream1.commaSeparatedValues + stream2.commaSeparatedValues);
+                    bolt.join(stream2.streamName, stream2.streamFields[stream2.fieldIndex], stream1.streamName);
+                    bolt.select(stream1.commaSeparatedValues + stream2.commaSeparatedValues);
                     bolt.prepare(null, null, mockedCollector);
                     bolt.execute(window);
                     
@@ -124,9 +127,8 @@ public class TestJoinBoltJoin {
                     
                     TupleWindow window = createNewWindow(stream1.inputStream, stream2.inputStream);
 
-                    JoinBolt bolt = new JoinBolt(JoinBolt.Selector.STREAM, stream1.streamName, stream1.streamFields[stream1.fieldIndex])
-                        .join("", "", stream1.streamName)
-                        .select(stream1.commaSeparatedValues);
+                    bolt.join("", "", stream1.streamName);
+                    bolt.select(stream1.commaSeparatedValues);
                     bolt.prepare(null, null, mockedCollector);
                     bolt.execute(window);
                     
@@ -141,10 +143,27 @@ public class TestJoinBoltJoin {
                     
                     TupleWindow window = createNewWindow(stream1.inputStream, stream2.inputStream);
 
-                    JoinBolt bolt = new JoinBolt(JoinBolt.Selector.STREAM, stream1.streamName, stream1.streamFields[stream1.fieldIndex])
-                    .join(stream2.streamName, stream2.streamFields[stream2.fieldIndex], stream1.streamName)
-                    .join(stream2.streamName, stream2.streamFields[stream2.fieldIndex], stream1.streamName)
-                        .select(stream1.commaSeparatedValues);
+                    bolt.join(stream2.streamName, stream2.streamFields[stream2.fieldIndex], stream1.streamName);
+                    bolt.join(stream2.streamName, stream2.streamFields[stream2.fieldIndex], stream1.streamName);
+
+                    bolt.select(stream1.commaSeparatedValues);
+                    bolt.prepare(null, null, mockedCollector);
+                    bolt.execute(window);
+                    
+                    assertEquals(expectedResult, mockedCollector.outputs.size());
+                } catch(Exception e){
+                    assertEquals(expectedResult, e.getClass());
+                }
+                break;
+            
+            case NOT_EXISTING_PRIOR:
+                try{
+                    
+                    TupleWindow window = createNewWindow(stream1.inputStream, stream2.inputStream);
+
+                    bolt.join(stream2.streamName, stream2.streamFields[stream2.fieldIndex], "foo");
+
+                    bolt.select(stream1.commaSeparatedValues);
                     bolt.prepare(null, null, mockedCollector);
                     bolt.execute(window);
                     
@@ -163,17 +182,17 @@ public class TestJoinBoltJoin {
 
     
     private static Stream<Arguments> testJoinBoltJoin(){
-        //  originStreamName       originStreamFields       originStreamData   (origin stream)
-        //  joiningStreamName      joiningStreamFields      joiningStreamData  (joining stream 1)
-        //  joiningStreamName      joiningStreamFields      joiningStreamData  (joining stream 2)
-        //  stream1 key            stream2 key
-        //  joinType
-        //  expectedResult (result size)
-        return Stream.of(       
-                Arguments.of( STREAM.RESERVATIONS,      STREAM.MENU,        null,               JOINTYPE.LEFT,                  0,     0,               6),
-                Arguments.of( STREAM.MENU,              STREAM.ORDERS,      null,               JOINTYPE.INNER,                 0,     1,               5),
-                Arguments.of( STREAM.MENU,              STREAM.ORDERS,      null,               JOINTYPE.EMPTY_STRING_JOIN,     0,     1,               RuntimeException.class),
-                Arguments.of( STREAM.MENU,              STREAM.ORDERS,      null,               JOINTYPE.SAME_STREAM_JOIN,      0,     1,               IllegalArgumentException.class)
+        //                 newStreamName    newKeyField     newFurtherStreamName   newFurtherkeyField   joinType        expectedResult
+        return Stream.of(   
+                // Test Suite Minimale    
+                Arguments.of( STREAM.RESERVATIONS,      1,        null,      0,        JOINTYPE.LEFT,                  6),
+                Arguments.of( STREAM.ORDERS,            1,        null,      0,        JOINTYPE.INNER,                 5),
+                Arguments.of( STREAM.ORDERS,            1,        null,      0,        JOINTYPE.EMPTY_STRING_JOIN,     RuntimeException.class),
+                Arguments.of( STREAM.ORDERS,            1,        null,      0,        JOINTYPE.NOT_EXISTING_PRIOR,    IllegalArgumentException.class),
+                Arguments.of( STREAM.NULL,              1,        null,      0,        JOINTYPE.LEFT,                  NullPointerException.class),
+
+                // Control Flow Coverage
+                Arguments.of( STREAM.ORDERS,            1,        null,      0,        JOINTYPE.SAME_STREAM_JOIN,      IllegalArgumentException.class)
         );
     }
 
@@ -183,21 +202,23 @@ public class TestJoinBoltJoin {
         INNER,
         EMPTY_STRING_JOIN,
         SAME_STREAM_JOIN,
-        THREE_STREAMS_LEFT,
-        THREE_STREAMS_INNER,
-        THREE_STREAMS_LEFT_INNER
+        NOT_EXISTING_PRIOR,
+        TRIPLE_LEFT,
+        TRIPLE_INNER,
+        TRIPLE_LEFT_INNER
     }
 
     public enum STREAM{
         RESERVATIONS,
         MENU,
-        ORDERS
+        ORDERS,
+        NULL
     }
 
 
     public static class StreamGenerator{
 
-        public TupleStream createStream( STREAM stream, int fieldIndex ){
+        public static TupleStream createStream( STREAM stream, int fieldIndex ){
             switch(stream){
                 case RESERVATIONS:
                     return new ReservationStream(fieldIndex);
@@ -205,19 +226,23 @@ public class TestJoinBoltJoin {
                     return new MenuStream(fieldIndex);
                 case ORDERS:
                     return new OrderStream(fieldIndex);
+                case NULL:
+                    return new TupleStreamImpl();
                 default:
-                    return null;
+                    return new TupleStreamImpl();
             }
         }
 
-        public abstract class TupleStream{
-            public ArrayList<Tuple>     inputStream;
-            public String[]             streamFields;
-            public Object[][]           streamData;
-            public String               commaSeparatedValues = "";
-            public String               streamName;
-            public int                  fieldIndex = 0;
-    
+        public static abstract class TupleStream{
+            public ArrayList<Tuple>     inputStream     = null;
+            public String[]             streamFields    = null;
+            public Object[][]           streamData      = null;
+            public String               commaSeparatedValues = null;
+            public String               streamName      = null;
+            public int                  fieldIndex      = 0;
+            
+            public TupleStream(){}
+
             public TupleStream( String[] streamFields, Object[][] streamData ){
                 this.streamFields = streamFields;
                 this.streamData = streamData;
@@ -227,7 +252,13 @@ public class TestJoinBoltJoin {
             }
         }
 
-        public class ReservationStream extends TupleStream{
+        public static class TupleStreamImpl extends TupleStream{
+            public TupleStreamImpl(){
+                super();
+            }
+        }
+
+        public static class ReservationStream extends TupleStream{
             public ReservationStream( int field1Index ){
                 super( reservationsFields, reservations );
                 this.fieldIndex = field1Index;
@@ -235,7 +266,7 @@ public class TestJoinBoltJoin {
                 this.inputStream = createNewStream("reservations", this.streamFields, this.streamData, "reservationsSpout");
             }
         }
-        public class MenuStream extends TupleStream{
+        public static class MenuStream extends TupleStream{
             public MenuStream( int field1Index ){
                 super( menuFields, menu );
                 this.fieldIndex = field1Index;
@@ -243,7 +274,7 @@ public class TestJoinBoltJoin {
                 this.inputStream = createNewStream("menu", this.streamFields, this.streamData, "menuSpout");
             }
         }
-        public class OrderStream extends TupleStream{
+        public static class OrderStream extends TupleStream{
             public OrderStream( int field1Index ){
                 super( ordersFields, orders );
                 this.fieldIndex = field1Index;

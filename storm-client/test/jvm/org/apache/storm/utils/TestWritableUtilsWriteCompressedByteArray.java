@@ -69,8 +69,8 @@ public class TestWritableUtilsWriteCompressedByteArray {
                     assertEquals((int) expectedResult, res);
                     break;
                 case NULL:
-                    baos =  null;
-                    dos =   null;
+                    baos = null;
+                    dos = null;
                     res = WritableUtils.writeCompressedByteArray(dos, content);
                     assertEquals((int) expectedResult, res);
                     break;
@@ -100,7 +100,8 @@ public class TestWritableUtilsWriteCompressedByteArray {
                 Arguments.of( STREAM_CASES.VALID,       "foo byte array!".getBytes(),           ( 100 * getCompressedSize("foo byte array!".getBytes()) )/"foo byte array!".getBytes().length),
                 Arguments.of( STREAM_CASES.VALID,       "".getBytes(),                          0),
                 Arguments.of( STREAM_CASES.VALID,       null,                                   -1),
-                Arguments.of( STREAM_CASES.INVALID,     "foo byte array!".getBytes(),           ClassCastException.class)
+                Arguments.of( STREAM_CASES.INVALID,     "foo byte array!".getBytes(),           ClassCastException.class),
+                Arguments.of( STREAM_CASES.NULL,        "foo byte array!".getBytes(),           NullPointerException.class)
         );
     }
 
