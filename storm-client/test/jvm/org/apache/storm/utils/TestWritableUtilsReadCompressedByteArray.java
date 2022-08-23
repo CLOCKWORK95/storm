@@ -105,6 +105,22 @@ public class TestWritableUtilsReadCompressedByteArray {
         return compressed;
     }
 
+    public static byte[] createEmptyCompressedByteArray() throws IOException{
+        byte[] compressed =     null;
+        ByteArrayOutputStream   baos2;
+        DataOutputStream        dos;
+        try{
+            baos2 = new ByteArrayOutputStream();
+            dos = new DataOutputStream(baos2);
+            dos.writeInt(-1);
+            compressed = baos2.toByteArray();
+            baos2.close();
+        } catch( Exception e){
+            e.printStackTrace();
+        }
+        return compressed;
+    }
+
     public static byte[] createEmptyByteArray(){
         return new byte[32];
     }
@@ -127,6 +143,9 @@ public class TestWritableUtilsReadCompressedByteArray {
             case EMPTY_BYTE_ARRAY:
                 target = (byte[]) createEmptyByteArray();
                 break;
+            case EMPTY_FORMATTED_BYTE_ARRAY:
+                target = (byte[]) createEmptyCompressedByteArray();
+                break;
             default:
                 break;
         }
@@ -147,7 +166,8 @@ public class TestWritableUtilsReadCompressedByteArray {
     public void testReadCompressedByteArray( DataInput dataInput , Object expectedResult){
         try{
             byte[] res = WritableUtils.readCompressedByteArray(dataInput);
-            assertArrayEquals((byte[])expectedResult, res);
+            if (res == null)    assertEquals(expectedResult, null);
+            else                assertArrayEquals((byte[])expectedResult, res);
         }
         catch (Exception e){
             assertEquals(expectedResult, e.getClass());
@@ -159,10 +179,13 @@ public class TestWritableUtilsReadCompressedByteArray {
     private static Stream<Arguments> testReadCompressedByteArray() throws IOException{
         //      DataInput       ExpectedResult
         return Stream.of(       
-                Arguments.of( createDataInput(STREAM_TYPES.FILE) ,              "foo file text!".getBytes()),
-                Arguments.of( createDataInput(STREAM_TYPES.BYTE_ARRAY),         "foo byte array text!".getBytes() ),
-                Arguments.of( createDataInput(STREAM_TYPES.EMPTY_BYTE_ARRAY),   EOFException.class ),
-                Arguments.of( null,                                NullPointerException.class )
+                // Test Suite Minimale
+                Arguments.of( createDataInput(STREAM_TYPES.FILE) ,                          "foo file text!".getBytes()),
+                Arguments.of( createDataInput(STREAM_TYPES.BYTE_ARRAY),                     "foo byte array text!".getBytes() ),
+                Arguments.of( createDataInput(STREAM_TYPES.EMPTY_BYTE_ARRAY),                EOFException.class ),
+                Arguments.of( null,                                             NullPointerException.class ),
+                // Control Flow Coverage
+                Arguments.of( createDataInput(STREAM_TYPES.EMPTY_FORMATTED_BYTE_ARRAY),      null )
         );
     }
 
@@ -171,7 +194,8 @@ public class TestWritableUtilsReadCompressedByteArray {
         FILE,
         BYTE_ARRAY,
         EMPTY_FILE,
-        EMPTY_BYTE_ARRAY
+        EMPTY_BYTE_ARRAY,
+        EMPTY_FORMATTED_BYTE_ARRAY
     }
 
     public static class StreamFactory{
@@ -184,6 +208,8 @@ public class TestWritableUtilsReadCompressedByteArray {
                 case BYTE_ARRAY:
                     return new ByteArrayInputStream( (byte[]) target );
                 case EMPTY_BYTE_ARRAY:
+                    return new ByteArrayInputStream( (byte[]) target );
+                case EMPTY_FORMATTED_BYTE_ARRAY:
                     return new ByteArrayInputStream( (byte[]) target );
                 default:
                     return null;

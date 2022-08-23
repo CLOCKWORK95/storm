@@ -57,6 +57,26 @@ public class TestWritableUtilsReadCompressedStringArray {
         return null;
     }
 
+    public static byte[] createNullStringArray() throws IOException{
+
+        ByteArrayOutputStream   baos2;
+        DataOutputStream        dos;
+        try{
+            baos2 = new ByteArrayOutputStream();
+            dos = new DataOutputStream(baos2);
+            dos.writeInt(-1);
+            
+            byte[] result = baos2.toByteArray();
+            baos2.close();
+
+            return result;
+            
+        } catch( Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static byte[] createEmptyStringArray(){
         return new byte[0];
     }
@@ -74,6 +94,9 @@ public class TestWritableUtilsReadCompressedStringArray {
                 break;
             case NULL:
                 target = null;
+                break;
+            case NULL_COMPRESSED_STRING_ARRAY:
+                target = (byte[]) createNullStringArray();
                 break;
             default:
                 break;
@@ -106,10 +129,13 @@ public class TestWritableUtilsReadCompressedStringArray {
     
     private static Stream<Arguments> testReadCompressedStringArray() throws IOException{
         //      DataInput       ExpectedResult
-        return Stream.of(       
+        return Stream.of(      
+                // Test Suite Minimale 
                 Arguments.of( createDataInput(ARRAY_TYPES.COMPRESSED_STRING_ARRAY) ,                new String[]{"foo"," ","string"," ","array"}),
                 Arguments.of( createDataInput(ARRAY_TYPES.EMPTY_STRING_ARRAY),                      EOFException.class ),
-                Arguments.of( createDataInput(ARRAY_TYPES.NULL),                                    NullPointerException.class )
+                Arguments.of( createDataInput(ARRAY_TYPES.NULL),                                    NullPointerException.class ),
+                // Control Flow Coverage
+                Arguments.of( createDataInput(ARRAY_TYPES.NULL_COMPRESSED_STRING_ARRAY),           null )
         );
     }
 
@@ -117,6 +143,7 @@ public class TestWritableUtilsReadCompressedStringArray {
     public enum ARRAY_TYPES{
         COMPRESSED_STRING_ARRAY,
         EMPTY_STRING_ARRAY,
-        NULL
+        NULL,
+        NULL_COMPRESSED_STRING_ARRAY
     }
 }

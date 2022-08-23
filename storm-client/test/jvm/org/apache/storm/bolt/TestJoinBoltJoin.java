@@ -106,6 +106,22 @@ public class TestJoinBoltJoin {
                 }
                 break;
 
+            case WRONG_LEFT:
+                try{
+                   
+                    TupleWindow window = createNewWindow(stream1.inputStream, stream2.inputStream);
+
+                    bolt.leftJoin(stream2.streamName, "foo", stream1.streamName);
+                    bolt.select(stream1.commaSeparatedValues + stream2.commaSeparatedValues);
+                    bolt.prepare(null, null, mockedCollector);
+                    bolt.execute(window);
+                    
+                    assertEquals(expectedResult, mockedCollector.outputs.size());
+                } catch(Exception e){
+                    assertEquals(expectedResult, e.getClass());
+                }
+                break;
+
             case INNER:
                 try{
                     
@@ -139,6 +155,7 @@ public class TestJoinBoltJoin {
                 break;
 
             case SAME_STREAM_JOIN:
+                // Added to improve control coverage
                 try{
                     
                     TupleWindow window = createNewWindow(stream1.inputStream, stream2.inputStream);
@@ -192,13 +209,15 @@ public class TestJoinBoltJoin {
                 Arguments.of( STREAM.NULL,              1,        null,      0,        JOINTYPE.LEFT,                  NullPointerException.class),
 
                 // Control Flow Coverage
-                Arguments.of( STREAM.ORDERS,            1,        null,      0,        JOINTYPE.SAME_STREAM_JOIN,      IllegalArgumentException.class)
+                Arguments.of( STREAM.ORDERS,            1,        null,      0,        JOINTYPE.SAME_STREAM_JOIN,      IllegalArgumentException.class),
+                Arguments.of( STREAM.RESERVATIONS,      1,        null,      0,        JOINTYPE.WRONG_LEFT,            6)
         );
     }
 
 
     public enum JOINTYPE{
         LEFT, 
+        WRONG_LEFT,
         INNER,
         EMPTY_STRING_JOIN,
         SAME_STREAM_JOIN,
