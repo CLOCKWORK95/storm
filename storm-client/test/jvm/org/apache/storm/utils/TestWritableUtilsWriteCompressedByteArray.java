@@ -1,6 +1,10 @@
 package org.apache.storm.utils;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInput;
+import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -18,13 +22,15 @@ public class TestWritableUtilsWriteCompressedByteArray {
     private static ByteArrayOutputStream baos;
 
     private static Stream<Arguments> testWriteCompressedByteArray() throws IOException{
-        //      DataInput       ExpectedResult
+        //      DataInput   Content    ExpectedResult
         return Stream.of(       
+                // Test Suite Minimale
                 Arguments.of( STREAM_CASES.VALID,       "foo byte array!".getBytes(),           ( 100 * getCompressedSize("foo byte array!".getBytes()) )/"foo byte array!".getBytes().length),
                 Arguments.of( STREAM_CASES.VALID,       "".getBytes(),                          0),
                 Arguments.of( STREAM_CASES.VALID,       null,                                   -1),
                 Arguments.of( STREAM_CASES.INVALID,     "foo byte array!".getBytes(),           ClassCastException.class),
                 Arguments.of( STREAM_CASES.NULL,        "foo byte array!".getBytes(),           NullPointerException.class)
+        
         );
     }
 
@@ -73,6 +79,14 @@ public class TestWritableUtilsWriteCompressedByteArray {
                 case VALID:
                     res = WritableUtils.writeCompressedByteArray(dos, content);
                     assertEquals((int) expectedResult, res);
+                    if (content == null){
+                        // Added after Mutation analysis
+                        byte[] compRes = baos.toByteArray();
+                        ByteArrayInputStream bais = new ByteArrayInputStream(compRes);
+                        DataInputStream  dis = new DataInputStream(bais);
+                        int header = dis.readInt();
+                        assertEquals(expectedResult, header);
+                    }
                     break;
                 case INVALID:
                     baos.close();
