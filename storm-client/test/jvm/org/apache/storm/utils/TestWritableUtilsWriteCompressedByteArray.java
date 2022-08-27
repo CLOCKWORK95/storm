@@ -17,6 +17,17 @@ public class TestWritableUtilsWriteCompressedByteArray {
     private static DataOutput dos;
     private static ByteArrayOutputStream baos;
 
+    private static Stream<Arguments> testWriteCompressedByteArray() throws IOException{
+        //      DataInput       ExpectedResult
+        return Stream.of(       
+                Arguments.of( STREAM_CASES.VALID,       "foo byte array!".getBytes(),           ( 100 * getCompressedSize("foo byte array!".getBytes()) )/"foo byte array!".getBytes().length),
+                Arguments.of( STREAM_CASES.VALID,       "".getBytes(),                          0),
+                Arguments.of( STREAM_CASES.VALID,       null,                                   -1),
+                Arguments.of( STREAM_CASES.INVALID,     "foo byte array!".getBytes(),           ClassCastException.class),
+                Arguments.of( STREAM_CASES.NULL,        "foo byte array!".getBytes(),           NullPointerException.class)
+        );
+    }
+
     public static int getCompressedSize(byte[] content) throws IOException{
         byte[] compressed =     null;
         ByteArrayOutputStream   baos;
@@ -93,17 +104,6 @@ public class TestWritableUtilsWriteCompressedByteArray {
         }
     }
 
-    
-    private static Stream<Arguments> testWriteCompressedByteArray() throws IOException{
-        //      DataInput       ExpectedResult
-        return Stream.of(       
-                Arguments.of( STREAM_CASES.VALID,       "foo byte array!".getBytes(),           ( 100 * getCompressedSize("foo byte array!".getBytes()) )/"foo byte array!".getBytes().length),
-                Arguments.of( STREAM_CASES.VALID,       "".getBytes(),                          0),
-                Arguments.of( STREAM_CASES.VALID,       null,                                   -1),
-                Arguments.of( STREAM_CASES.INVALID,     "foo byte array!".getBytes(),           ClassCastException.class),
-                Arguments.of( STREAM_CASES.NULL,        "foo byte array!".getBytes(),           NullPointerException.class)
-        );
-    }
 
 
     public enum STREAM_CASES{

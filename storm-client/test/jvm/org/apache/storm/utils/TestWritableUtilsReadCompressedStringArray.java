@@ -17,6 +17,17 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 public class TestWritableUtilsReadCompressedStringArray {
     
+    private static Stream<Arguments> testReadCompressedStringArray() throws IOException{
+        //      DataInput       ExpectedResult
+        return Stream.of(      
+                // Test Suite Minimale 
+                Arguments.of( createDataInput(ARRAY_TYPES.COMPRESSED_STRING_ARRAY) ,                new String[]{"foo"," ","string"," ","array"}),
+                Arguments.of( createDataInput(ARRAY_TYPES.EMPTY_STRING_ARRAY),                      EOFException.class ),
+                Arguments.of( createDataInput(ARRAY_TYPES.NULL),                                    NullPointerException.class ),
+                // Control Flow Coverage
+                Arguments.of( createDataInput(ARRAY_TYPES.NULL_COMPRESSED_STRING_ARRAY),           null )
+        );
+    }
 
     public static byte[] createCompressedStringArray() throws IOException{
 
@@ -125,19 +136,6 @@ public class TestWritableUtilsReadCompressedStringArray {
         }
     }
 
-
-    
-    private static Stream<Arguments> testReadCompressedStringArray() throws IOException{
-        //      DataInput       ExpectedResult
-        return Stream.of(      
-                // Test Suite Minimale 
-                Arguments.of( createDataInput(ARRAY_TYPES.COMPRESSED_STRING_ARRAY) ,                new String[]{"foo"," ","string"," ","array"}),
-                Arguments.of( createDataInput(ARRAY_TYPES.EMPTY_STRING_ARRAY),                      EOFException.class ),
-                Arguments.of( createDataInput(ARRAY_TYPES.NULL),                                    NullPointerException.class ),
-                // Control Flow Coverage
-                Arguments.of( createDataInput(ARRAY_TYPES.NULL_COMPRESSED_STRING_ARRAY),           null )
-        );
-    }
 
 
     public enum ARRAY_TYPES{

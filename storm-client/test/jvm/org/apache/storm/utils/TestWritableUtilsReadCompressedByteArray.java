@@ -27,6 +27,20 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 public class TestWritableUtilsReadCompressedByteArray {
 
+
+    private static Stream<Arguments> testReadCompressedByteArray() throws IOException{
+        //      DataInput       ExpectedResult
+        return Stream.of(       
+                // Test Suite Minimale
+                Arguments.of( createDataInput(STREAM_TYPES.FILE) ,                          "foo file text!".getBytes()),
+                Arguments.of( createDataInput(STREAM_TYPES.BYTE_ARRAY),                     "foo byte array text!".getBytes() ),
+                Arguments.of( createDataInput(STREAM_TYPES.EMPTY_BYTE_ARRAY),                EOFException.class ),
+                Arguments.of( null,                                             NullPointerException.class ),
+                // Control Flow Coverage
+                Arguments.of( createDataInput(STREAM_TYPES.EMPTY_FORMATTED_BYTE_ARRAY),      null )
+        );
+    }
+
     public void createCompressedImageFile() {
         
         BufferedImage image = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
@@ -172,21 +186,6 @@ public class TestWritableUtilsReadCompressedByteArray {
         catch (Exception e){
             assertEquals(expectedResult, e.getClass());
         }
-    }
-
-
-    
-    private static Stream<Arguments> testReadCompressedByteArray() throws IOException{
-        //      DataInput       ExpectedResult
-        return Stream.of(       
-                // Test Suite Minimale
-                Arguments.of( createDataInput(STREAM_TYPES.FILE) ,                          "foo file text!".getBytes()),
-                Arguments.of( createDataInput(STREAM_TYPES.BYTE_ARRAY),                     "foo byte array text!".getBytes() ),
-                Arguments.of( createDataInput(STREAM_TYPES.EMPTY_BYTE_ARRAY),                EOFException.class ),
-                Arguments.of( null,                                             NullPointerException.class ),
-                // Control Flow Coverage
-                Arguments.of( createDataInput(STREAM_TYPES.EMPTY_FORMATTED_BYTE_ARRAY),      null )
-        );
     }
 
 

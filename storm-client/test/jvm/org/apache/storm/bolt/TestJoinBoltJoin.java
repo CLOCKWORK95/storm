@@ -3,6 +3,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.apache.storm.bolt.JoinBolt.JoinAccumulator;
 import org.apache.storm.bolt.TestJoinBoltJoin.StreamGenerator.TupleStream;
 import org.apache.storm.task.GeneralTopologyContext;
 import org.apache.storm.tuple.Tuple;
@@ -45,6 +47,12 @@ public class TestJoinBoltJoin {
         {3,             "salad"}
     };
 
+    static String[] emptyFields = {"a", "b"};
+    static Object[][] empty = {
+        {null,             null},
+        {null,             null},
+    };
+
     private static CustomCollector  mockedCollector;
 
 
@@ -65,7 +73,7 @@ public class TestJoinBoltJoin {
         );
     }
 
-    
+
     private static ArrayList<Tuple> createNewStream(String streamName, String[] fieldNames, Object[][] data, String srcComponentName) {
         GeneralTopologyContext mockContext = new CustomContext(fieldNames);
         ArrayList<Tuple> stream = new ArrayList<>();
@@ -208,6 +216,24 @@ public class TestJoinBoltJoin {
                 }
                 break;
 
+            case EMPTY:
+                try{
+                    //stream1 = StreamGenerator.createStream(STREAM.EMPTY, 0);
+                    //bolt = new JoinBolt(JoinBolt.Selector.STREAM, stream1.streamName, stream1.streamFields[stream1.fieldIndex]);
+                    TupleWindow window = createNewWindow(stream1.inputStream, stream2.inputStream);
+
+                    bolt.join(null, stream2.streamFields[stream2.fieldIndex], stream1.streamName);
+
+                    bolt.select(stream1.commaSeparatedValues + stream2.commaSeparatedValues);
+                    bolt.prepare(null, null, mockedCollector);
+                    bolt.execute(window);
+                    
+                    assertEquals(expectedResult, mockedCollector.outputs.size());
+                } catch(Exception e){
+                    assertEquals(expectedResult, e.getClass());
+                }
+                break;
+
             default:
                 break;
         }
@@ -220,14 +246,16 @@ public class TestJoinBoltJoin {
         INNER,
         EMPTY_STRING_JOIN,
         SAME_STREAM_JOIN,
-        NOT_EXISTING_PRIOR
+        NOT_EXISTING_PRIOR,
+        EMPTY
     }
 
     public enum STREAM{
         RESERVATIONS,
         MENU,
         ORDERS,
-        NULL
+        NULL,
+        EMPTY
     }
 
 
@@ -243,6 +271,8 @@ public class TestJoinBoltJoin {
                     return new OrderStream(fieldIndex);
                 case NULL:
                     return new TupleStreamImpl();
+                case EMPTY:
+                    return new EmptyStream(fieldIndex);
                 default:
                     return new TupleStreamImpl();
             }
@@ -295,6 +325,14 @@ public class TestJoinBoltJoin {
                 this.fieldIndex = field1Index;
                 this.streamName = "orders";
                 this.inputStream = createNewStream("orders", this.streamFields, this.streamData, "ordersSpout");
+            }
+        }
+        public static class EmptyStream extends TupleStream{
+            public EmptyStream( int field1Index ){
+                super( emptyFields, empty );
+                this.fieldIndex = field1Index;
+                this.streamName = null;
+                this.inputStream = createNewStream(null, this.streamFields, this.streamData, "emptySpout");
             }
         }
     }

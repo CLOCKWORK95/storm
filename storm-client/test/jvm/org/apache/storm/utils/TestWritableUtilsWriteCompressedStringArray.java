@@ -22,6 +22,18 @@ public class TestWritableUtilsWriteCompressedStringArray {
     private static ByteArrayOutputStream    baos;
     private static byte[]                   compressedStringArray = null;
 
+    private static Stream<Arguments> testWriteCompressedByteArray() throws IOException{
+        //      DataInput       ExpectedResult
+        return Stream.of(       
+                // Test Suite Minimale
+                Arguments.of( STREAM_CASES.VALID_INPUT_STREAM,       new String[]{"foo"," string", " array"},   new String[]{"foo"," string", " array"} ),
+                Arguments.of( STREAM_CASES.VALID_INPUT_STREAM,       new String[]{},                            new String[]{}),
+                Arguments.of( STREAM_CASES.NULL,                     null,                                      NullPointerException.class),
+                Arguments.of( STREAM_CASES.INVALID_INPUT_STREAM,     new String[]{},                            ClassCastException.class),
+                // Control Flow Coverage
+                Arguments.of( STREAM_CASES.VALID_INPUT_STREAM,       null,                                      null)
+        );
+    }
     
     @BeforeEach
     public void configure() throws IOException{
@@ -72,20 +84,6 @@ public class TestWritableUtilsWriteCompressedStringArray {
         } catch( Exception e ){
             e.printStackTrace();
         }
-    }
-
-    
-    private static Stream<Arguments> testWriteCompressedByteArray() throws IOException{
-        //      DataInput       ExpectedResult
-        return Stream.of(       
-                // Test Suite Minimale
-                Arguments.of( STREAM_CASES.VALID_INPUT_STREAM,       new String[]{"foo"," string", " array"},   new String[]{"foo"," string", " array"} ),
-                Arguments.of( STREAM_CASES.VALID_INPUT_STREAM,       new String[]{},                            new String[]{}),
-                Arguments.of( STREAM_CASES.NULL,                     null,                                      NullPointerException.class),
-                Arguments.of( STREAM_CASES.INVALID_INPUT_STREAM,     new String[]{},                            ClassCastException.class),
-                // Control Flow Coverage
-                Arguments.of( STREAM_CASES.VALID_INPUT_STREAM,       null,                                      null)
-        );
     }
 
 
