@@ -3,8 +3,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.apache.storm.bolt.JoinBolt.JoinAccumulator;
 import org.apache.storm.bolt.TestJoinBoltJoin.StreamGenerator.TupleStream;
 import org.apache.storm.task.GeneralTopologyContext;
 import org.apache.storm.tuple.Tuple;
@@ -111,22 +111,24 @@ public class TestJoinBoltJoin {
     @ParameterizedTest
     @MethodSource
     public void testJoinBoltJoin( STREAM secondStream, int field2Index, STREAM thirdStream, int field3Index, JOINTYPE jointype, Object expectedResult ){
-
+        
+        JoinBolt j1,j2;
         stream2 = StreamGenerator.createStream(secondStream, field2Index);
 
         switch(jointype){
 
             case LEFT:
                 try{
-                   
                     TupleWindow window = createNewWindow(stream1.inputStream, stream2.inputStream);
 
-                    bolt.leftJoin(stream2.streamName, stream2.streamFields[stream2.fieldIndex], stream1.streamName);
-                    bolt.select(stream1.commaSeparatedValues + stream2.commaSeparatedValues);
+                    j1 = bolt.leftJoin(stream2.streamName, stream2.streamFields[stream2.fieldIndex], stream1.streamName);
+                    j2 = bolt.select(stream1.commaSeparatedValues + stream2.commaSeparatedValues);
                     bolt.prepare(null, null, mockedCollector);
                     bolt.execute(window);
                     
                     assertEquals(expectedResult, mockedCollector.outputs.size());
+                    // Added after Mutation Coverage Analysis
+                    assertTrue(j1.getClass() == JoinBolt.class && j2.getClass() == JoinBolt.class);
                 } catch(Exception e){
                     assertEquals(expectedResult, e.getClass());
                 }
@@ -153,12 +155,14 @@ public class TestJoinBoltJoin {
                     
                     TupleWindow window = createNewWindow(stream1.inputStream, stream2.inputStream);
 
-                    bolt.join(stream2.streamName, stream2.streamFields[stream2.fieldIndex], stream1.streamName);
-                    bolt.select(stream1.commaSeparatedValues + stream2.commaSeparatedValues);
+                    j1 = bolt.join(stream2.streamName, stream2.streamFields[stream2.fieldIndex], stream1.streamName);
+                    j2 = bolt.select(stream1.commaSeparatedValues + stream2.commaSeparatedValues);
                     bolt.prepare(null, null, mockedCollector);
                     bolt.execute(window);
                     
                     assertEquals(expectedResult, mockedCollector.outputs.size());
+                    // Added after Mutation Coverage Analysis
+                    assertTrue(j1.getClass() == JoinBolt.class && j2.getClass() == JoinBolt.class);
                 } catch(Exception e){
                     assertEquals(expectedResult, e.getClass());
                 }
