@@ -28,6 +28,19 @@ public class TestJoinBoltSelect {
     private static ArrayList<Tuple> inputStream;
     private static TupleWindow      window;
     private static JoinBolt         bolt;
+
+    
+    private static Stream<Arguments> testJoinBoltSelect(){
+        //      fields       expectedResult (result size)
+        return Stream.of(       
+                Arguments.of( "field1,field2",                      transformStreamData()),
+                Arguments.of( "field1",                             transformStreamDataFirstOnly()),
+                Arguments.of( "",                                   nullStream()),
+                Arguments.of( null,                                 NullPointerException.class),
+                Arguments.of( "notExistingField!",                  nullStream()),
+                Arguments.of( "field1,field2,field3",               transformStreamDataPlusNull())
+        );
+    }
     
 
     private static ArrayList<List<Object>> transformStreamDataFirstOnly(){
@@ -109,19 +122,6 @@ public class TestJoinBoltSelect {
         } catch(Exception e){
             assertEquals(expectedResult, e.getClass());
         }
-    }
-
-    
-    private static Stream<Arguments> testJoinBoltSelect(){
-        //      fields       expectedResult (result size)
-        return Stream.of(       
-                Arguments.of( "field1,field2",                      transformStreamData()),
-                Arguments.of( "field1",                             transformStreamDataFirstOnly()),
-                Arguments.of( "",                                   nullStream()),
-                Arguments.of( null,                                 NullPointerException.class),
-                Arguments.of( "notExistingField!",                  nullStream()),
-                Arguments.of( "field1,field2,field3",               transformStreamDataPlusNull())
-        );
     }
 
 

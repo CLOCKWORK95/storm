@@ -48,6 +48,24 @@ public class TestJoinBoltJoin {
     private static CustomCollector  mockedCollector;
 
 
+    private static Stream<Arguments> testJoinBoltJoin(){
+        //                 newStreamName    newKeyField     newFurtherStreamName   newFurtherkeyField   joinType        expectedResult
+        return Stream.of(   
+                // Test Suite Minimale    
+                Arguments.of( STREAM.RESERVATIONS,      1,        null,      0,        JOINTYPE.LEFT,                  6),
+                Arguments.of( STREAM.ORDERS,            1,        null,      0,        JOINTYPE.INNER,                 5),
+                Arguments.of( STREAM.ORDERS,            1,        null,      0,        JOINTYPE.EMPTY_STRING_JOIN,     RuntimeException.class),
+                Arguments.of( STREAM.ORDERS,            1,        null,      0,        JOINTYPE.NOT_EXISTING_PRIOR,    IllegalArgumentException.class),
+                Arguments.of( STREAM.NULL,              1,        null,      0,        JOINTYPE.LEFT,                  NullPointerException.class),
+
+                // Control Flow Coverage
+                Arguments.of( STREAM.ORDERS,            1,        null,      0,        JOINTYPE.SAME_STREAM_JOIN,      IllegalArgumentException.class),
+                Arguments.of( STREAM.RESERVATIONS,      1,        null,      0,        JOINTYPE.WRONG_LEFT,            6)
+
+        );
+    }
+
+    
     private static ArrayList<Tuple> createNewStream(String streamName, String[] fieldNames, Object[][] data, String srcComponentName) {
         GeneralTopologyContext mockContext = new CustomContext(fieldNames);
         ArrayList<Tuple> stream = new ArrayList<>();
@@ -189,29 +207,10 @@ public class TestJoinBoltJoin {
                     assertEquals(expectedResult, e.getClass());
                 }
                 break;
-            
 
             default:
                 break;
         }
-    }
-
-
-    
-    private static Stream<Arguments> testJoinBoltJoin(){
-        //                 newStreamName    newKeyField     newFurtherStreamName   newFurtherkeyField   joinType        expectedResult
-        return Stream.of(   
-                // Test Suite Minimale    
-                Arguments.of( STREAM.RESERVATIONS,      1,        null,      0,        JOINTYPE.LEFT,                  6),
-                Arguments.of( STREAM.ORDERS,            1,        null,      0,        JOINTYPE.INNER,                 5),
-                Arguments.of( STREAM.ORDERS,            1,        null,      0,        JOINTYPE.EMPTY_STRING_JOIN,     RuntimeException.class),
-                Arguments.of( STREAM.ORDERS,            1,        null,      0,        JOINTYPE.NOT_EXISTING_PRIOR,    IllegalArgumentException.class),
-                Arguments.of( STREAM.NULL,              1,        null,      0,        JOINTYPE.LEFT,                  NullPointerException.class),
-
-                // Control Flow Coverage
-                Arguments.of( STREAM.ORDERS,            1,        null,      0,        JOINTYPE.SAME_STREAM_JOIN,      IllegalArgumentException.class),
-                Arguments.of( STREAM.RESERVATIONS,      1,        null,      0,        JOINTYPE.WRONG_LEFT,            6)
-        );
     }
 
 
@@ -221,10 +220,7 @@ public class TestJoinBoltJoin {
         INNER,
         EMPTY_STRING_JOIN,
         SAME_STREAM_JOIN,
-        NOT_EXISTING_PRIOR,
-        TRIPLE_LEFT,
-        TRIPLE_INNER,
-        TRIPLE_LEFT_INNER
+        NOT_EXISTING_PRIOR
     }
 
     public enum STREAM{
