@@ -384,10 +384,10 @@
         <module>storm-client</module>
         <module>storm-server</module>
         <!--><module>storm-core</module>
-        <module>storm-webapp</module><-->
+        <module>storm-webapp</module>
         <module>storm-clojure</module>
-        <module>storm-clojure-test</module>
-        <module>storm-submit-tools</module>
+        <module>storm-clojure-test</module> <-->
+        <module>storm-submit-tools</module> 
         <!--> ADDED NEW MODULE TO COLLECT COVERAGE REPORTS OF ALL MODULES WITH TESTS 
           OTHER STEPS ARE ABOUT POM.XML FILES OF ALL INVOLVED SUBMODULES, ALSO THE JACOCO-REPORT-AGGREGATOR MODULE
         <-->
