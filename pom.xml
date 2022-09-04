@@ -694,8 +694,8 @@
                 <module>integration-test</module>
 
                 <!-- The following modules have dependencies on external modules. -->
-                <module>flux</module>
-                <module>sql</module>
+                <!--><module>flux</module>
+                <module>sql</module><-->
             </modules>
         </profile>
         <!--><profile>
